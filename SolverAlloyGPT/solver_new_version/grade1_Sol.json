@@ -1,0 +1,29 @@
+----------------
+Command Check repair_assert_1: 
+Counterexample: yes 
+Counterexample_msg: Check repair_assert_1
+Counterexample found which means that Check repair_assert_1 assertion is invalid
+this/Student={Student$0, Student$1}
+this/Professor={Professor$0}
+this/Person={Student$0, Professor$0, Student$1}
+this/Class={Class$0, Class$1, Class$2}
+this/Class<:assistant_for={Class$0->Student$0, Class$1->Student$1, Class$2->Student$0, Class$2->Student$1}
+this/Class<:instructor_of={Class$0->Professor$0, Class$1->Professor$0, Class$2->Professor$0}
+this/Assignment={Assignment$0, Assignment$1, Assignment$2}
+this/Assignment<:associated_with={Assignment$0->Class$2, Assignment$1->Class$1, Assignment$2->Class$2}
+this/Assignment<:assigned_to={Assignment$0->Student$0, Assignment$0->Student$1, Assignment$1->Student$0, Assignment$1->Student$1, Assignment$2->Student$0, Assignment$2->Student$1}
+
+
+Instance: No
+Instance_msg: 
+Instance not found which means that the specification is not consistent.
+
+-----------------------------------------
+
+=========================================
+Command Run repair_pred_1: 
+Instance: Yes
+Instance_msg: Run repair_pred_1
+Instance found which means that the specification is consistent
+
+=========================================

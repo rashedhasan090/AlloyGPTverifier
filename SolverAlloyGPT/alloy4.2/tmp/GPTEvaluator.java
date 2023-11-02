@@ -50,7 +50,7 @@ public class GPTEvaluator {
 
         GPTEvaluator e = new GPTEvaluator();
         FileOutputStream oStream = null;
-        String outputFile = args[0].substring(0, args[0].length() - 4) + "_Sol.txt";
+        String outputFile = args[0].substring(0, args[0].length() - 4) + "_Sol.json";
         oStream = new FileOutputStream(outputFile);
         PrintStream f = new PrintStream(oStream, true);
         System.setOut(f);
@@ -71,6 +71,7 @@ public class GPTEvaluator {
             String firstPart = line.split("=")[0];
             if (firstPart.contains("<:")){
                 System.out.println(line);
+
             }else{
                 boolean flag =false;
                 for (Sig sig: sigs.values()){
@@ -83,6 +84,8 @@ public class GPTEvaluator {
                     System.out.println(line);
                 }
 
+
+
             }
 
 //            if (line.contains("this")){
@@ -90,12 +93,17 @@ public class GPTEvaluator {
 //            }
 
         }
+        System.out.println("\n");
+        System.out.println("Instance: No");
+        System.out.println("Instance_msg: ");
+        System.out.println("Instance not found which means that the specification is not consistent.");
+
         return sol;
 
     }
 
     public void callAlloyEngine(String model) throws Err, FileNotFoundException {
-        String trimmedFilenameAllSols = model.substring(0, model.length() - 4) + "_Sol.txt";
+        String trimmedFilenameAllSols = model.substring(0, model.length() - 4) + "_Sol.json";
         //I need save the output of instanceParser in the same _Sol.txt file.
 
         oFile = new FileOutputStream(trimmedFilenameAllSols, false);
@@ -141,7 +149,8 @@ public class GPTEvaluator {
             if (command.toString().contains("Check"))
             {
 
-                System.out.println("Command " + command + ": (" + sdf.format(startTime) + ")");
+//                System.out.println("Command " + command + ": (" + sdf.format(startTime) + ")");
+                  System.out.println("Command " + command + ": ");
 //                System.out.println("Command " + command + ": (" + sdf.format(startTime) + ")");
                 try {
                     ans = TranslateAlloyToKodkod.execute_command(rep, root.getAllReachableSigs(), command, options);
@@ -156,7 +165,12 @@ public class GPTEvaluator {
                 }
 
                 if (ans.satisfiable()) {
-                    System.out.println("Counterexample found which means that " + command + " assertion is invalid");
+                    System.out.println("Counterexample: yes ");
+                    System.out.println("Counterexample_msg: " + command);
+                    System.out.println("Counterexample found which means that "+ command + " assertion is invalid");
+
+
+
 //                    System.out..println("Counterexample found which means that " + command + " assertion is invalid");
                     //Not only print the statement but I need to export the counterexample in a text file. The name of the file is the same as the model file but with a different extension.
                     //String trimmedFilenameCounterEx = model.substring(0, model.length() - 4) + "_CounterEx.txt";
@@ -180,7 +194,10 @@ public class GPTEvaluator {
 
 
                 } else {
+                    System.out.println("Counterexample: no ");
+                    System.out.println("Counterexample_msg: ");
                     System.out.println("Counterexample not found which means that " + command + " is valid");
+
 //                    pPRINT.println("Counterexample not found which means that " + command + " is valid");
                 }
 
@@ -193,7 +210,8 @@ public class GPTEvaluator {
             }else if (command.toString().contains("Run"))
             {
 
-                System.out.println("Command " + command + ": (" + sdf.format(startTime) + ")");
+//                System.out.println("Command " + command + ": (" + sdf.format(startTime) + ")");
+                System.out.println("Command " + command + ": ");
 //                pPRINT.println("Command " + command + ": (" + sdf.format(startTime) + ")");
                 try {
                     ans = TranslateAlloyToKodkod.execute_command(rep, root.getAllReachableSigs(), command, options);
@@ -209,9 +227,13 @@ public class GPTEvaluator {
                 }
 
                 if (ans.satisfiable()) {
+                    System.out.println("Instance: Yes");
+                    System.out.println("Instance_msg: " + command);
                     System.out.println("Instance found which means that the specification is consistent");
 //                    pPRINT.println("Instance found which means that the specification is consistent");
                 } else {
+                    System.out.println("Instance: No");
+                    System.out.println("Instance_msg: ");
                     System.out.println("Instance not found which means that the specification is not consistent.");
 //                    pPRINT.println("Instance not found which means that the specification is not consistent.");
                     System.out.println("\n-----------------------------------------");
