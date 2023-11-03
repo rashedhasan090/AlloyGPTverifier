@@ -17,7 +17,7 @@ Our ChatGPT verifier with Alloy API's
 - "GPTEvaluator" is the main class in "tmp" folder.
 - Alloy API files can also be found.
 
-## Building.jar from source 
+## Building .jar from source 
 
 - git clone [project]
 - Import the project into IntelliJ IDEA.
