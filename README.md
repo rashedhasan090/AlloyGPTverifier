@@ -1,5 +1,6 @@
 # AlloyGPTverifier
-Our ChatGPT verifier with Alloy API's
+Our Alloy specification verifier with Alloy API's, which helps us to 
+run Alloy specification swiftly and integrate it with otyer services. 
 
 
 ## Usage
