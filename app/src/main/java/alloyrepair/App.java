@@ -47,16 +47,16 @@ public class App {
      */
 
     public static void main(String args[]) throws FileNotFoundException {
-
+        String path = args[0];
         App e = new App();
         FileOutputStream oStream = null;
-        String outputFile = args[0].substring(0, args[0].length() - 4) + "_Sol.json";
+        String outputFile = path.substring(0, path.length() - 4) + "_Sol.json";
         oStream = new FileOutputStream(outputFile);
         PrintStream f = new PrintStream(oStream, true);
         System.setOut(f);
 
         try {
-            e.callAlloyEngine(args[0]);
+            e.callAlloyEngine(path);
         } catch (Exception err) {
             err.printStackTrace();
             pPRINT.println(err);
@@ -183,7 +183,7 @@ public class App {
                     // System.out.println("Counterexample found in file: " +
                     // trimmedFilenameCounterEx);
                     // pPRINT.println("Counterexample found in file: " + trimmedFilenameCounterEx);
-                    String parsedInstance = instanceParser(ans.toString(), root.getSigs());
+                    // String parsedInstance = instanceParser(ans.toString(), root.getSigs());
                     root.getAllSigs();
                     // try {
                     //// System.out.println(ans);
