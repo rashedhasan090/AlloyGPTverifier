@@ -1,7 +1,6 @@
 ----------------
 Command Check repair_assert_1: 
 Counterexample: yes 
-Counterexample_msg: Check repair_assert_1
 Counterexample found which means that Check repair_assert_1 assertion is invalid
 this/Person={Person$0}
 this/Person<:member_of={Person$0->Group$0}
@@ -12,17 +11,11 @@ this/seclab={seclab$0}
 this/Room={seclab$0, Room$0}
 this/Room<:located_in={seclab$0->alas$0, seclab$0->peds$0, seclab$0->Group$0}
 
-
-Instance: No
-Instance_msg: 
-Instance not found which means that the specification is not consistent.
-
 -----------------------------------------
 
 =========================================
 Command Run repair_pred_1: 
 Instance: Yes
-Instance_msg: Run repair_pred_1
 Instance found which means that the specification is consistent
 
 =========================================

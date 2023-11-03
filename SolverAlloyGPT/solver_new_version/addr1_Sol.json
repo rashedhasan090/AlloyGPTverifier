@@ -1,13 +1,11 @@
 ----------------
 Command Check repair_assert_1 for exactly 1 Address, exactly 2 Name, exactly 1 Book: 
 Counterexample: no 
-Counterexample_msg: 
 Counterexample not found which means that Check repair_assert_1 for exactly 1 Address, exactly 2 Name, exactly 1 Book is valid
 
 =========================================
 Command Run repair_pred_1 for exactly 1 Address, exactly 2 Name, exactly 1 Book: 
 Instance: Yes
-Instance_msg: Run repair_pred_1 for exactly 1 Address, exactly 2 Name, exactly 1 Book
 Instance found which means that the specification is consistent
 
 =========================================

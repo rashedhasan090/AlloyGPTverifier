@@ -1,7 +1,6 @@
 ----------------
 Command Check repair_assert_1: 
 Counterexample: yes 
-Counterexample_msg: Check repair_assert_1
 Counterexample found which means that Check repair_assert_1 assertion is invalid
 this/List={List$0}
 this/List<:header={List$0->Node$2}
@@ -12,17 +11,11 @@ this/True={True$0}
 this/False={False$0}
 this/Boolean={True$0, False$0}
 
-
-Instance: No
-Instance_msg: 
-Instance not found which means that the specification is not consistent.
-
 -----------------------------------------
 
 =========================================
 Command Run repair_pred_1: 
 Instance: Yes
-Instance_msg: Run repair_pred_1
 Instance found which means that the specification is consistent
 
 =========================================

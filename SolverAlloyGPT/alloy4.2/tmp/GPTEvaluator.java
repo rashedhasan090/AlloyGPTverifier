@@ -93,10 +93,10 @@ public class GPTEvaluator {
 //            }
 
         }
-        System.out.println("\n");
-        System.out.println("Instance: No");
-        System.out.println("Instance_msg: ");
-        System.out.println("Instance not found which means that the specification is not consistent.");
+//        System.out.println("\n");
+//        System.out.println("Instance: No");
+//        System.out.println("Instance_msg: ");
+//        System.out.println("Instance not found which means that the specification is not consistent.");
 
         return sol;
 
@@ -166,7 +166,7 @@ public class GPTEvaluator {
 
                 if (ans.satisfiable()) {
                     System.out.println("Counterexample: yes ");
-                    System.out.println("Counterexample_msg: " + command);
+//                    System.out.println("Counterexample_msg: " + command);
                     System.out.println("Counterexample found which means that "+ command + " assertion is invalid");
 
 
@@ -195,7 +195,7 @@ public class GPTEvaluator {
 
                 } else {
                     System.out.println("Counterexample: no ");
-                    System.out.println("Counterexample_msg: ");
+//                    System.out.println("Counterexample_msg: ");
                     System.out.println("Counterexample not found which means that " + command + " is valid");
 
 //                    pPRINT.println("Counterexample not found which means that " + command + " is valid");
@@ -228,12 +228,12 @@ public class GPTEvaluator {
 
                 if (ans.satisfiable()) {
                     System.out.println("Instance: Yes");
-                    System.out.println("Instance_msg: " + command);
+//                    System.out.println("Instance_msg: " + command);
                     System.out.println("Instance found which means that the specification is consistent");
 //                    pPRINT.println("Instance found which means that the specification is consistent");
                 } else {
                     System.out.println("Instance: No");
-                    System.out.println("Instance_msg: ");
+//                    System.out.println("Instance_msg: ");
                     System.out.println("Instance not found which means that the specification is not consistent.");
 //                    pPRINT.println("Instance not found which means that the specification is not consistent.");
                     System.out.println("\n-----------------------------------------");
