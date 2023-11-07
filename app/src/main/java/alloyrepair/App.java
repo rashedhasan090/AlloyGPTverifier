@@ -101,10 +101,6 @@ public class App {
     }
 
     public void callAlloyEngine(String model) throws Err, FileNotFoundException {
-        Path path = Paths.get(model).toAbsolutePath();
-
-        // Get the parent path (directory path without the file name)
-
         // Convert the directory path to String
         String reportFile = model.substring(0, model.length() - 4);
 
