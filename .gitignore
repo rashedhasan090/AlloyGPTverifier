@@ -3,6 +3,7 @@
 build/
 target/
 bin/
+app/build
 
 # Mac OS X files
 .DS_Store
