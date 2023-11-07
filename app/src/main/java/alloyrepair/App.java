@@ -101,13 +101,15 @@ public class App {
     }
 
     public void callAlloyEngine(String model) throws Err, FileNotFoundException {
-        Path path = Paths.get(model);
+        Path path = Paths.get(model).toAbsolutePath();
+        ;
 
         // Get the parent path (directory path without the file name)
         Path directoryPath = path.getParent();
 
         // Convert the directory path to String
-        String directoryPathStr = directoryPath.toString();
+        // String directoryPathStr = directoryPath.toString();
+        String directoryPathStr = (directoryPath != null) ? directoryPath.toString() : "";
 
         uniqueSkolems = new HashMap<String, String>();
         skolemsHashMAp = new HashMap<String, HashSet<String>>();
