@@ -7,7 +7,6 @@ import edu.mit.csail.sdg.alloy4.A4Reporter;
 import edu.mit.csail.sdg.alloy4.Err;
 import edu.mit.csail.sdg.alloy4.ErrorWarning;
 import edu.mit.csail.sdg.alloy4compiler.ast.*;
-import edu.mit.csail.sdg.alloy4compiler.parser.CompModule;
 import edu.mit.csail.sdg.alloy4compiler.parser.CompUtil;
 import edu.mit.csail.sdg.alloy4compiler.translator.A4Options;
 import edu.mit.csail.sdg.alloy4compiler.translator.A4Solution;
@@ -19,6 +18,17 @@ import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+
 public class App {
     Module root = null;
     A4Solution ans = null;
@@ -26,6 +36,8 @@ public class App {
     protected ArrayList<String> resultsArray = new ArrayList<String>();
     static int solutionNo = 1;
     static int maxSol = 10000000;
+
+    JsonObject jsonObject = new JsonObject();
 
     FileOutputStream oFile;
     static PrintStream pPRINT = null;
@@ -47,13 +59,13 @@ public class App {
      */
 
     public static void main(String args[]) throws FileNotFoundException {
-        String path = args[0];
+        String path = "/Users/moh/Downloads/repos/repair-sw-spec/datasets/sample/student18_1.als";// args[0];
         App e = new App();
-        FileOutputStream oStream = null;
-        String outputFile = path.substring(0, path.length() - 4) + "_Sol.json";
-        oStream = new FileOutputStream(outputFile);
-        PrintStream f = new PrintStream(oStream, true);
-        System.setOut(f);
+        // FileOutputStream oStream = null;
+        // String outputFile = path.substring(0, path.length() - 4) + "_Sol.json";
+        // oStream = new FileOutputStream(outputFile);
+        // PrintStream f = new PrintStream(oStream, true);
+        // System.setOut(f);
 
         try {
             e.callAlloyEngine(path);
@@ -61,8 +73,6 @@ public class App {
             err.printStackTrace();
             pPRINT.println(err);
         }
-        // e.query(args[1]);
-
     }
 
     public static String instanceParser(String sol, Map<String, Sig> sigs) {
@@ -103,7 +113,13 @@ public class App {
 
     public void callAlloyEngine(String model) throws Err, FileNotFoundException {
         String trimmedFilenameAllSols = model.substring(0, model.length() - 4) + "_Sol.json";
-        // I need save the output of instanceParser in the same _Sol.txt file.
+        Path path = Paths.get(model);
+
+        // Get the parent path (directory path without the file name)
+        Path directoryPath = path.getParent();
+
+        // Convert the directory path to String
+        String directoryPathStr = directoryPath.toString();
 
         oFile = new FileOutputStream(trimmedFilenameAllSols, false);
         pPRINT = new PrintStream(oFile);
@@ -117,7 +133,7 @@ public class App {
 
         distinctSrcDst = new HashMap<String, HashSet<String>>(); // new HashMap<String, Integer>();
 
-        boolean isFinished = false;
+        // boolean isFinished = false;
         A4Reporter rep = new A4Reporter() {
             @Override
             public void warning(ErrorWarning msg) {
@@ -126,31 +142,23 @@ public class App {
             }
         };
         root = CompUtil.parseEverything_fromFile(rep, null, model);
-        // for (:root.getOld2fields()
-        // ) {
-        //
-        // }
-        // System.out.println(root.getSigs());
-        System.out.println("----------------");
-        // Choose some default options for how you want to execute the commands
+
+        // for(ErrorWarning w:warns) rep.warning(w);
         A4Options options = new A4Options();
         options.solver = A4Options.SatSolver.SAT4J; // .KK;//.MiniSatJNI; //.MiniSatProverJNI;//.SAT4J;
         options.symmetry = 20;
         options.skolemDepth = 1;
 
-        long now, start = System.currentTimeMillis();
+        // long now, start = System.currentTimeMillis();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date startTime = new Date(start);
+        // Date startTime = new Date(start);
 
         for (Command command : root.getAllCommands()) {
             if (command.toString().contains("Check")) {
-
-                // System.out.println("Command " + command + ": (" + sdf.format(startTime) +
-                // ")");
                 System.out.println("Command " + command + ": ");
-                // System.out.println("Command " + command + ": (" + sdf.format(startTime) +
-                // ")");
+                jsonObject.addProperty("cntr_cmd", command.toString());
+
                 try {
                     ans = TranslateAlloyToKodkod.execute_command(rep, root.getAllReachableSigs(), command, options);
                 } catch (Err err) {
@@ -165,62 +173,28 @@ public class App {
 
                 if (ans.satisfiable()) {
                     System.out.println("Counterexample: yes ");
-                    // System.out.println("Counterexample_msg: " + command);
+                    jsonObject.addProperty("counterexample", "yes");
                     System.out.println("Counterexample found which means that " + command + " assertion is invalid");
+                    jsonObject.addProperty("counterexample_msg",
+                            "Counterexample found which means that " + command + " assertion is invalid");
 
-                    // System.out..println("Counterexample found which means that " + command + "
-                    // assertion is invalid");
-                    // Not only print the statement but I need to export the counterexample in a
-                    // text file. The name of the file is the same as the model file but with a
-                    // different extension.
-                    // String trimmedFilenameCounterEx = model.substring(0, model.length() - 4) +
-                    // "_CounterEx.txt";
-                    // I actually need to export the counterexample in text format not in <skolem>
-                    // rather than in text where the counterexample starts with
-
-                    // String trimmedFilenameCounterEx = model.substring(0, model.length() - 4) +
-                    // "_CounterEx.als";
-                    // System.out.println("Counterexample found in file: " +
-                    // trimmedFilenameCounterEx);
-                    // pPRINT.println("Counterexample found in file: " + trimmedFilenameCounterEx);
-                    // String parsedInstance = instanceParser(ans.toString(), root.getSigs());
+                    String parsedInstance = instanceParser(ans.toString(), root.getSigs());
                     root.getAllSigs();
-                    // try {
-                    //// System.out.println(ans);
-                    // String parsedInstance = instanceParser(ans.toString(), root.getSigs());
-                    //// System.out.println(parsedInstance);
-                    //// ans.writeXML(trimmedFilenameCounterEx);
-                    //
-                    // } catch (Err err) {
-                    // err.printStackTrace();
-                    // }
-                    System.out.println("\n-----------------------------------------");
-                    // pPRINT.println("\n-----------------------------------------");
-
                 } else {
                     System.out.println("Counterexample: no ");
-                    // System.out.println("Counterexample_msg: ");
+                    jsonObject.addProperty("counterexample", "no");
                     System.out.println("Counterexample not found which means that " + command + " is valid");
-
-                    // pPRINT.println("Counterexample not found which means that " + command + " is
-                    // valid");
+                    jsonObject.addProperty("counterexample_msg",
+                            "Counterexample not found which means that " + command + " is valid");
                 }
 
-                System.out.println("\n=========================================");
-
-                // pPRINT.println("\n=========================================");
-
             } else if (command.toString().contains("Run")) {
-
-                // System.out.println("Command " + command + ": (" + sdf.format(startTime) +
-                // ")");
                 System.out.println("Command " + command + ": ");
-                // pPRINT.println("Command " + command + ": (" + sdf.format(startTime) + ")");
+                jsonObject.addProperty("instance_cmd", command.toString());
                 try {
                     ans = TranslateAlloyToKodkod.execute_command(rep, root.getAllReachableSigs(), command, options);
                 } catch (Err err) {
                     err.printStackTrace();
-                    // pPRINT.println(err.msg);
                 }
                 for (ExprVar a : ans.getAllAtoms()) {
                     root.addGlobal(a.label, a);
@@ -231,26 +205,29 @@ public class App {
 
                 if (ans.satisfiable()) {
                     System.out.println("Instance: Yes");
+                    jsonObject.addProperty("instance", "Yes");
                     // System.out.println("Instance_msg: " + command);
                     System.out.println("Instance found which means that the specification is consistent");
-                    // pPRINT.println("Instance found which means that the specification is
-                    // consistent");
+                    jsonObject.addProperty("instance_msg",
+                            "Instance found which means that the specification is consistent");
                 } else {
                     System.out.println("Instance: No");
+                    jsonObject.addProperty("instance", "No");
                     // System.out.println("Instance_msg: ");
                     System.out.println("Instance not found which means that the specification is not consistent.");
-                    // pPRINT.println("Instance not found which means that the specification is not
-                    // consistent.");
-                    System.out.println("\n-----------------------------------------");
+                    jsonObject.addProperty("instance_msg",
+                            "Instance not found which means that the specification is not consistent.");
                 }
-
-                System.out.println("\n=========================================");
-
-                // pPRINT.println("\n=========================================");
-
             }
         }
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+        // Write the JSON object to a file
+        try (Writer writer = new FileWriter(directoryPathStr + "/" + "alloyAnalyzerReport.json")) {
+            gson.toJson(jsonObject, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private String printTime(long start) {
