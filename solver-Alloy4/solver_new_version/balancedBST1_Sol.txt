@@ -1,0 +1,11 @@
+Command Check repair_assert_1: (02:52:57)
+Counterexample found
+Counterexample found in file: balancedBST1_CounterEx.als
+
+-----------------------------------------
+
+=========================================
+Command Run repair_pred_1: (02:52:57)
+Instance found
+
+=========================================

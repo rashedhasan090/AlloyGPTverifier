@@ -1,0 +1,11 @@
+Command Check repair_assert_1: (02:53:01)
+Counterexample found
+Counterexample found in file: student1_CounterEx.als
+
+-----------------------------------------
+
+=========================================
+Command Run repair_pred_1: (02:53:01)
+Instance found
+
+=========================================
