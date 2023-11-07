@@ -44,3 +44,9 @@ application {
     // Define the main class for the application.
     mainClass = 'alloyrepair.App'
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'alloyrepair.App'
+    }
+}
