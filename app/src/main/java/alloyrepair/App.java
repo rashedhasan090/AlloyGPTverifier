@@ -38,6 +38,7 @@ public class App {
     static int maxSol = 10000000;
 
     JsonObject jsonObject = new JsonObject();
+    private static List<String> warnings = new ArrayList<>();
 
     FileOutputStream oFile;
     static PrintStream pPRINT = null;
@@ -59,19 +60,20 @@ public class App {
      */
 
     public static void main(String args[]) throws FileNotFoundException {
-        String path = "/Users/moh/Downloads/repos/repair-sw-spec/datasets/sample/student18_1.als";// args[0];
+        String als_path = args[0];
         App e = new App();
-        // FileOutputStream oStream = null;
-        // String outputFile = path.substring(0, path.length() - 4) + "_Sol.json";
-        // oStream = new FileOutputStream(outputFile);
-        // PrintStream f = new PrintStream(oStream, true);
-        // System.setOut(f);
-
+        e.jsonObject.addProperty("cntr_cmd", "");
+        e.jsonObject.addProperty("counterexample", "");
+        e.jsonObject.addProperty("counterexample_msg", "");
+        e.jsonObject.addProperty("instance_cmd", "");
+        e.jsonObject.addProperty("instance", "");
+        e.jsonObject.addProperty("instance_msg", "");
+        e.jsonObject.addProperty("error", "");
         try {
-            e.callAlloyEngine(path);
+            e.callAlloyEngine(als_path);
         } catch (Exception err) {
             err.printStackTrace();
-            pPRINT.println(err);
+            e.jsonObject.addProperty("error", err.toString());
         }
     }
 
@@ -93,26 +95,12 @@ public class App {
                 if (flag) {
                     System.out.println(line);
                 }
-
             }
-
-            // if (line.contains("this")){
-            // System.out.println(line);
-            // }
-
         }
-        // System.out.println("\n");
-        // System.out.println("Instance: No");
-        // System.out.println("Instance_msg: ");
-        // System.out.println("Instance not found which means that the specification is
-        // not consistent.");
-
         return sol;
-
     }
 
     public void callAlloyEngine(String model) throws Err, FileNotFoundException {
-        String trimmedFilenameAllSols = model.substring(0, model.length() - 4) + "_Sol.json";
         Path path = Paths.get(model);
 
         // Get the parent path (directory path without the file name)
@@ -121,8 +109,6 @@ public class App {
         // Convert the directory path to String
         String directoryPathStr = directoryPath.toString();
 
-        oFile = new FileOutputStream(trimmedFilenameAllSols, false);
-        pPRINT = new PrintStream(oFile);
         uniqueSkolems = new HashMap<String, String>();
         skolemsHashMAp = new HashMap<String, HashSet<String>>();
 
@@ -131,19 +117,24 @@ public class App {
         intents = new HashMap<String, Integer>();
         perm = new HashMap<String, Integer>();
 
-        distinctSrcDst = new HashMap<String, HashSet<String>>(); // new HashMap<String, Integer>();
+        distinctSrcDst = new HashMap<String, HashSet<String>>();
 
-        // boolean isFinished = false;
         A4Reporter rep = new A4Reporter() {
             @Override
             public void warning(ErrorWarning msg) {
-                System.out.print("Relevance Warning:\n" + (msg.toString().trim()) + "\n\n");
-                System.out.flush();
+                String warningText = "Warning " + msg.toString().trim();
+                if (warningText.contains(model)) {
+                    // Replace the model path with "the specification"
+                    warningText = warningText.replace(model, "the specification");
+                }
+                warnings.add(warningText);
             }
         };
         root = CompUtil.parseEverything_fromFile(rep, null, model);
 
-        // for(ErrorWarning w:warns) rep.warning(w);
+        String warningsConcatenated = String.join(" ", warnings);
+        jsonObject.addProperty("error", warningsConcatenated);
+
         A4Options options = new A4Options();
         options.solver = A4Options.SatSolver.SAT4J; // .KK;//.MiniSatJNI; //.MiniSatProverJNI;//.SAT4J;
         options.symmetry = 20;
@@ -156,7 +147,6 @@ public class App {
 
         for (Command command : root.getAllCommands()) {
             if (command.toString().contains("Check")) {
-                System.out.println("Command " + command + ": ");
                 jsonObject.addProperty("cntr_cmd", command.toString());
 
                 try {
@@ -172,24 +162,31 @@ public class App {
                 }
 
                 if (ans.satisfiable()) {
-                    System.out.println("Counterexample: yes ");
-                    jsonObject.addProperty("counterexample", "yes");
-                    System.out.println("Counterexample found which means that " + command + " assertion is invalid");
-                    jsonObject.addProperty("counterexample_msg",
-                            "Counterexample found which means that " + command + " assertion is invalid");
+                    jsonObject.addProperty("counterexample", "Yes");
 
-                    String parsedInstance = instanceParser(ans.toString(), root.getSigs());
-                    root.getAllSigs();
+                    // String parsedInstance = instanceParser(ans.toString(), root.getSigs());
+                    StringBuilder sb = new StringBuilder();
+                    for (Sig sig : ans.getAllReachableSigs()) {
+                        if (sig.builtin)
+                            continue;
+                        sb.append(sig).append("=").append(ans.eval(sig)).append("\n");
+
+                        // Iterate over the fields of each signature
+                        for (Sig.Field field : sig.getFields()) {
+                            // Print the tuple set for each field
+                            sb.append(sig).append(".").append(field.label).append("=").append(ans.eval(field))
+                                    .append("\n");
+                        }
+                    }
+                    jsonObject.addProperty("counterexample_msg",
+                            "Counterexample found which means that " + command + " assertion is invalid\n" + sb);
                 } else {
-                    System.out.println("Counterexample: no ");
                     jsonObject.addProperty("counterexample", "no");
-                    System.out.println("Counterexample not found which means that " + command + " is valid");
                     jsonObject.addProperty("counterexample_msg",
                             "Counterexample not found which means that " + command + " is valid");
                 }
 
             } else if (command.toString().contains("Run")) {
-                System.out.println("Command " + command + ": ");
                 jsonObject.addProperty("instance_cmd", command.toString());
                 try {
                     ans = TranslateAlloyToKodkod.execute_command(rep, root.getAllReachableSigs(), command, options);
@@ -204,23 +201,17 @@ public class App {
                 }
 
                 if (ans.satisfiable()) {
-                    System.out.println("Instance: Yes");
                     jsonObject.addProperty("instance", "Yes");
-                    // System.out.println("Instance_msg: " + command);
-                    System.out.println("Instance found which means that the specification is consistent");
                     jsonObject.addProperty("instance_msg",
                             "Instance found which means that the specification is consistent");
                 } else {
-                    System.out.println("Instance: No");
                     jsonObject.addProperty("instance", "No");
-                    // System.out.println("Instance_msg: ");
-                    System.out.println("Instance not found which means that the specification is not consistent.");
                     jsonObject.addProperty("instance_msg",
                             "Instance not found which means that the specification is not consistent.");
                 }
             }
         }
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
         // Write the JSON object to a file
         try (Writer writer = new FileWriter(directoryPathStr + "/" + "alloyAnalyzerReport.json")) {
@@ -228,16 +219,6 @@ public class App {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private String printTime(long start) {
-        StringBuilder sb = new StringBuilder();
-        long now;
-        now = System.currentTimeMillis();
-        sb.append(// "Sol: " + solutionNo + " " +
-                "within: " + (now - start) / 1000 + "sec.");
-        sb.append("\n-----------------------------------------");
-        return sb.toString();
     }
 
     protected void solve(String AlloyFile) {

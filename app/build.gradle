@@ -24,13 +24,13 @@ dependencies {
     implementation fileTree(dir: 'lib', include: ['*.jar'])
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs 'src/main/java', './alloy4.2'
-        }
-    }
-}
+// sourceSets {
+//     main {
+//         java {
+//             srcDirs 'src/main/java', './alloy4.2'
+//         }
+//     }
+// }
 
 // Apply a specific Java toolchain to ease working on different environments.
 java {
