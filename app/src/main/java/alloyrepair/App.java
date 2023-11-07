@@ -102,14 +102,11 @@ public class App {
 
     public void callAlloyEngine(String model) throws Err, FileNotFoundException {
         Path path = Paths.get(model).toAbsolutePath();
-        ;
 
         // Get the parent path (directory path without the file name)
-        Path directoryPath = path.getParent();
 
         // Convert the directory path to String
-        // String directoryPathStr = directoryPath.toString();
-        String directoryPathStr = (directoryPath != null) ? directoryPath.toString() : "";
+        String reportFile = model.substring(0, model.length() - 4);
 
         uniqueSkolems = new HashMap<String, String>();
         skolemsHashMAp = new HashMap<String, HashSet<String>>();
@@ -216,7 +213,9 @@ public class App {
         Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
         // Write the JSON object to a file
-        try (Writer writer = new FileWriter(directoryPathStr + "/" + "alloyAnalyzerReport.json")) {
+        // try (Writer writer = new FileWriter(directoryPathStr + "/" + fileName +
+        // "_alloyAnalyzerReport.json")) {
+        try (Writer writer = new FileWriter(reportFile + "_alloyAnalyzerReport.json")) {
             gson.toJson(jsonObject, writer);
         } catch (IOException e) {
             e.printStackTrace();
