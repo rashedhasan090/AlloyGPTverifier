@@ -15,11 +15,10 @@ import edu.mit.csail.sdg.alloy4compiler.translator.TranslateAlloyToKodkod;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -27,7 +26,6 @@ import com.google.gson.JsonObject;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 
 public class App {
     Module root = null;
@@ -37,7 +35,8 @@ public class App {
     static int solutionNo = 1;
     static int maxSol = 10000000;
 
-    JsonObject jsonObject = new JsonObject();
+    private Gson gson;
+    private JsonObject jsonReport;
     private static List<String> warnings = new ArrayList<>();
 
     FileOutputStream oFile;
@@ -51,6 +50,40 @@ public class App {
     HashMap<String, HashSet<String>> distinctSrcDst;
 
     public App() {
+        jsonReport = JsonHelper.createJsonObject("", "", "", "", "", "", "");
+        gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+    }
+
+    public void addCounterexample(String cntrCmd, String counterexample, String counterexampleMsg) {
+        JsonHelper.addCounterexample(jsonReport, cntrCmd, counterexample, counterexampleMsg);
+    }
+
+    public void addInstance(String instanceCmd, String instances, String instanceMsg) {
+        JsonHelper.addInstance(jsonReport, instanceCmd, instances, instanceMsg);
+    }
+
+    public void updateError(String errorMessage) {
+        jsonReport.addProperty("error", errorMessage);
+    }
+
+    public JsonObject getMyJson() {
+        return jsonReport;
+    }
+
+    public void writeJsonToFile(String fileName) {
+        try (FileWriter writer = new FileWriter(fileName)) {
+            gson.toJson(jsonReport, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateErrorWithStackTrace(Exception err) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        err.printStackTrace(pw);
+        String stackTrace = sw.toString(); // Stack trace as a string
+        jsonReport.addProperty("error", stackTrace);
     }
 
     /**
@@ -61,49 +94,21 @@ public class App {
 
     public static void main(String args[]) throws FileNotFoundException {
         String als_path = args[0];
+        String reportFile = als_path.substring(0, als_path.length() - 4);
+
         App e = new App();
-        e.jsonObject.addProperty("cntr_cmd", "");
-        e.jsonObject.addProperty("counterexample", "");
-        e.jsonObject.addProperty("counterexample_msg", "");
-        e.jsonObject.addProperty("instance_cmd", "");
-        e.jsonObject.addProperty("instance", "");
-        e.jsonObject.addProperty("instance_msg", "");
-        e.jsonObject.addProperty("error", "");
+
         try {
             e.callAlloyEngine(als_path);
+            e.writeJsonToFile(reportFile + "_alloyAnalyzerReport.json");
         } catch (Exception err) {
-            err.printStackTrace();
-            e.jsonObject.addProperty("error", err.toString());
+            // err.printStackTrace();
+            e.updateErrorWithStackTrace(err);
+            e.writeJsonToFile(reportFile + "_alloyAnalyzerReport.json");
         }
-    }
-
-    public static String instanceParser(String sol, Map<String, Sig> sigs) {
-        String[] lines = sol.split("\n");
-        for (String line : lines) {
-            String firstPart = line.split("=")[0];
-            if (firstPart.contains("<:")) {
-                System.out.println(line);
-
-            } else {
-                boolean flag = false;
-                for (Sig sig : sigs.values()) {
-                    if (sig.toString().equals(firstPart)) {
-                        flag = true;
-                        break;
-                    }
-                }
-                if (flag) {
-                    System.out.println(line);
-                }
-            }
-        }
-        return sol;
     }
 
     public void callAlloyEngine(String model) throws Err, FileNotFoundException {
-        // Convert the directory path to String
-        String reportFile = model.substring(0, model.length() - 4);
-
         uniqueSkolems = new HashMap<String, String>();
         skolemsHashMAp = new HashMap<String, HashSet<String>>();
 
@@ -128,7 +133,7 @@ public class App {
         root = CompUtil.parseEverything_fromFile(rep, null, model);
 
         String warningsConcatenated = String.join(" ", warnings);
-        jsonObject.addProperty("error", warningsConcatenated);
+        updateError(warningsConcatenated);
 
         A4Options options = new A4Options();
         options.solver = A4Options.SatSolver.SAT4J; // .KK;//.MiniSatJNI; //.MiniSatProverJNI;//.SAT4J;
@@ -142,8 +147,8 @@ public class App {
 
         for (Command command : root.getAllCommands()) {
             if (command.toString().contains("Check")) {
-                jsonObject.addProperty("cntr_cmd", command.toString());
-
+                String cntr_cmd, counterexample, counterexample_msg;
+                cntr_cmd = command.toString();
                 try {
                     ans = TranslateAlloyToKodkod.execute_command(rep, root.getAllReachableSigs(), command, options);
                 } catch (Err err) {
@@ -157,9 +162,8 @@ public class App {
                 }
 
                 if (ans.satisfiable()) {
-                    jsonObject.addProperty("counterexample", "Yes");
+                    counterexample = "Yes";
 
-                    // String parsedInstance = instanceParser(ans.toString(), root.getSigs());
                     StringBuilder sb = new StringBuilder();
                     for (Sig sig : ans.getAllReachableSigs()) {
                         if (sig.builtin)
@@ -173,16 +177,16 @@ public class App {
                                     .append("\n");
                         }
                     }
-                    jsonObject.addProperty("counterexample_msg",
-                            "Counterexample found which means that " + command + " assertion is invalid\n" + sb);
+                    counterexample_msg = "Counterexample found which means that " + command + " assertion is invalid\n"
+                            + sb;
                 } else {
-                    jsonObject.addProperty("counterexample", "no");
-                    jsonObject.addProperty("counterexample_msg",
-                            "Counterexample not found which means that " + command + " is valid");
+                    counterexample = "no";
+                    counterexample_msg = "Counterexample not found which means that " + command + " is valid";
                 }
-
+                addCounterexample(cntr_cmd, counterexample, counterexample_msg);
             } else if (command.toString().contains("Run")) {
-                jsonObject.addProperty("instance_cmd", command.toString());
+                String instance_cmd, instance, instance_msg;
+                instance_cmd = command.toString();
                 try {
                     ans = TranslateAlloyToKodkod.execute_command(rep, root.getAllReachableSigs(), command, options);
                 } catch (Err err) {
@@ -196,67 +200,13 @@ public class App {
                 }
 
                 if (ans.satisfiable()) {
-                    jsonObject.addProperty("instance", "Yes");
-                    jsonObject.addProperty("instance_msg",
-                            "Instance found which means that the specification is consistent");
+                    instance = "Yes";
+                    instance_msg = "Instance found which means that the specification is consistent";
                 } else {
-                    jsonObject.addProperty("instance", "No");
-                    jsonObject.addProperty("instance_msg",
-                            "Instance not found which means that the specification is not consistent.");
+                    instance = "No";
+                    instance_msg = "Instance not found which means that the specification is not consistent.";
                 }
-            }
-        }
-        Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-
-        // Write the JSON object to a file
-        // try (Writer writer = new FileWriter(directoryPathStr + "/" + fileName +
-        // "_alloyAnalyzerReport.json")) {
-        try (Writer writer = new FileWriter(reportFile + "_alloyAnalyzerReport.json")) {
-            gson.toJson(jsonObject, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected void solve(String AlloyFile) {
-        // Alloy4 sends diagnostic messages and progress reports to the A4Reporter.
-        // By default, the A4Reporter ignores all these events (but you can extend the
-        // A4Reporter to display the event for the user)
-        A4Reporter rep = new A4Reporter() {
-            // For example, here we choose to display each "warning" by printing it to
-            // System.out
-            @Override
-            public void warning(ErrorWarning msg) {
-                System.out.print("Relevance Warning:\n" + (msg.toString().trim()) + "\n\n");
-                System.out.flush();
-            }
-        };
-
-        try {
-            root = CompUtil.parseEverything_fromFile(rep, null, AlloyFile);
-        } catch (Err err) {
-
-            err.printStackTrace();
-        }
-        A4Options options = new A4Options();
-        options.solver = A4Options.SatSolver.SAT4J;// .KK;//.MiniSatJNI; //.MiniSatProverJNI;//.SAT4J;
-
-        options.symmetry = 20;
-        options.skolemDepth = 1;
-
-        for (Command command : root.getAllCommands()) {
-            // Execute the command
-            System.out.println("============ Command " + command + ": ============");
-            try {
-                ans = TranslateAlloyToKodkod.execute_command(rep, root.getAllReachableSigs(), command, options);
-            } catch (Err err) {
-                err.printStackTrace();
-            }
-            for (ExprVar a : ans.getAllAtoms()) {
-                root.addGlobal(a.label, a);
-            }
-            for (ExprVar a : ans.getAllSkolems()) {
-                root.addGlobal(a.label, a);
+                addInstance(instance_cmd, instance, instance_msg);
             }
         }
     }
