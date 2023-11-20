@@ -8,15 +8,15 @@ import edu.mit.csail.sdg.alloy4.Err;
 import edu.mit.csail.sdg.alloy4.ErrorWarning;
 import edu.mit.csail.sdg.alloy4compiler.ast.*;
 import edu.mit.csail.sdg.alloy4compiler.parser.CompUtil;
-import edu.mit.csail.sdg.alloy4compiler.translator.A4Options;
-import edu.mit.csail.sdg.alloy4compiler.translator.A4Solution;
-import edu.mit.csail.sdg.alloy4compiler.translator.TranslateAlloyToKodkod;
+import edu.mit.csail.sdg.alloy4compiler.translator.*;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -78,12 +78,49 @@ public class App {
         }
     }
 
-    public void updateErrorWithStackTrace(Exception err) {
+    public void updateErrorWithStackTrace(Exception err, String model) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         err.printStackTrace(pw);
         String stackTrace = sw.toString(); // Stack trace as a string
-        jsonReport.addProperty("error", stackTrace);
+
+        //Extract Alloy spec file name
+        Path path = Paths.get(model);
+        Path fileName = path.getFileName();
+
+        StringBuilder errorSB = new StringBuilder();
+        if (stackTrace.contains("Type error")){
+            int i = 0;
+            errorSB.append("Compiling the Alloy model " + fileName + " generates a type error at ");
+            for (String comp: stackTrace.split("\n")){
+                if (i == 0 && comp.contains(" at ")){
+                    String[] warningComps = comp.split(" at ");
+
+                    errorSB.append(warningComps[1] + "\n");
+                }else if(!comp.contains("\tat")){
+                    errorSB.append(comp + "\n");
+                }
+                i++;
+            }
+        }else if(stackTrace.contains("Syntax error")){
+            int i = 0;
+            errorSB.append("Compiling the Alloy model " + fileName + " generates a syntax error at ");
+            for (String comp: stackTrace.split("\n")){
+                if (i == 0 && comp.contains(" at ")){
+                    String[] warningComps = comp.split(" at ");
+
+                    errorSB.append(warningComps[1] + " (The true origin of this syntax error could be before or after this line)" + "\n");
+                }else if(!comp.contains("\tat")){
+                    errorSB.append(comp + "\n");
+                }
+                i++;
+            }
+
+
+        }else{
+            errorSB.append(stackTrace);
+        }
+        jsonReport.addProperty("error", errorSB.toString().replaceAll("this/",""));
     }
 
     /**
@@ -102,10 +139,37 @@ public class App {
             e.callAlloyEngine(als_path);
             e.writeJsonToFile(reportFile + "_alloyAnalyzerReport.json");
         } catch (Exception err) {
-            // err.printStackTrace();
-            e.updateErrorWithStackTrace(err);
+            e.updateErrorWithStackTrace(err,als_path);
             e.writeJsonToFile(reportFile + "_alloyAnalyzerReport.json");
         }
+    }
+
+    public static boolean isNumeric(String string) {
+        int intValue;
+
+//        System.out.println(String.format("Parsing string: \"%s\"", string));
+
+        if(string == null || string.equals("")) {
+//            System.out.println("String cannot be parsed, it is null or empty.");
+            return false;
+        }
+
+        try {
+            intValue = Integer.parseInt(string);
+            return true;
+        } catch (NumberFormatException e) {
+//            System.out.println("Input String cannot be parsed to Integer.");
+        }
+        return false;
+    }
+
+    private static String commandSimplifier(String command){
+        String newCommand = command;
+        if (!command.equals(null) && command.contains("expect")){
+            String[] commandComps = command.split("expect");
+            newCommand = commandComps[0].trim();
+        }
+        return newCommand;
     }
 
     public void callAlloyEngine(String model) throws Err, FileNotFoundException {
@@ -119,17 +183,41 @@ public class App {
 
         distinctSrcDst = new HashMap<String, HashSet<String>>();
 
+        //Extract Alloy spec file name
+        Path path = Paths.get(model);
+        Path fileName = path.getFileName();
+
+        //Compilation Error Message Formatting
         A4Reporter rep = new A4Reporter() {
             @Override
             public void warning(ErrorWarning msg) {
-                String warningText = "Warning " + msg.toString().trim();
-                if (warningText.contains(model)) {
-                    // Replace the model path with "the specification"
-                    warningText = warningText.replace(model, "the specification");
+
+                StringBuilder warningSB = new StringBuilder();
+                String warningText = msg.toString().trim();
+                int i = 0;
+                warningSB.append("Compiling the Alloy model " + fileName + " generates a compilation error at ");
+                for (String comp: warningText.split("\n")){
+                    if (i == 0 && comp.contains(" in ")){
+                        String[] warningComps = comp.split(" in ");
+
+                        warningSB.append(warningComps[0] + "\n");
+                    }else{
+                        warningSB.append(comp + "\n");
+                    }
+                    i++;
                 }
-                warnings.add(warningText);
+
+//                if (warningText.contains(model)) {
+//                    // Replace the model path with "the specification"
+//                    warningText = warningText.replace(model, "the Alloy model");
+//                }
+                warnings.add(warningSB.toString().replaceAll("this/","")+"\n");
             }
+
         };
+
+
+
         root = CompUtil.parseEverything_fromFile(rep, null, model);
 
         String warningsConcatenated = String.join(" ", warnings);
@@ -146,9 +234,13 @@ public class App {
         // Date startTime = new Date(start);
 
         for (Command command : root.getAllCommands()) {
+            //Simplify command
+            String newCommand = commandSimplifier(command.toString());
+
             if (command.toString().contains("Check")) {
                 String cntr_cmd, counterexample, counterexample_msg;
                 cntr_cmd = command.toString();
+
                 try {
                     ans = TranslateAlloyToKodkod.execute_command(rep, root.getAllReachableSigs(), command, options);
                 } catch (Err err) {
@@ -161,27 +253,99 @@ public class App {
                     root.addGlobal(a.label, a);
                 }
 
+
+
                 if (ans.satisfiable()) {
                     counterexample = "Yes";
-
                     StringBuilder sb = new StringBuilder();
+                    A4TupleSet univTupleSet = ans.eval(ans.getAllReachableSigs().get(0));
+                    HashMap<String, String> atomsNameMap = new HashMap<>();
+                    for (A4Tuple a4Tuple: univTupleSet){
+
+                        if (!isNumeric(a4Tuple.toString())){
+
+                            String[] comps= a4Tuple.toString().split("\\$");
+                            StringBuilder newTupleName = new StringBuilder();
+
+                            for (int i = 0; i < comps[0].length(); i++) {
+                                Character c = comps[0].charAt(i);
+                                if (Character.isUpperCase(c)){
+                                    newTupleName.append(c);
+                                }
+                            }
+                            newTupleName.append(comps[1]);
+                            atomsNameMap.put(a4Tuple.toString(), newTupleName.toString());
+
+                        }
+
+                    }
+
+
+
                     for (Sig sig : ans.getAllReachableSigs()) {
                         if (sig.builtin)
                             continue;
-                        sb.append(sig).append("=").append(ans.eval(sig)).append("\n");
 
+                        StringBuilder newSigBuilder = new StringBuilder();
+                        newSigBuilder.append("{");
+                        if (ans.eval(sig).size() > 0 ){
+                            for (A4Tuple tuple : ans.eval(sig)){
+                                if (atomsNameMap.containsKey(tuple.toString())){
+                                    newSigBuilder.append(atomsNameMap.get(tuple.toString())).append(",");
+                                }
+                            }
+                            newSigBuilder.deleteCharAt(newSigBuilder.length() - 1);
+                        }
+
+
+                        newSigBuilder.append("}");
+
+                        String newSigLabel = sig.toString().replaceAll("this/","");
+                        sb.append(newSigLabel).append("=").append(newSigBuilder).append("\n");
+//                        sb.append(sig).append("=").append(ans.eval(sig)).append("\n");
                         // Iterate over the fields of each signature
                         for (Sig.Field field : sig.getFields()) {
                             // Print the tuple set for each field
-                            sb.append(sig).append(".").append(field.label).append("=").append(ans.eval(field))
+                            StringBuilder newFieldBuilder = new StringBuilder();
+
+                            newFieldBuilder.append("{");
+                            if (ans.eval(field).size() > 0) {
+                                for (A4Tuple tuple : ans.eval(field)) {
+
+                                    String newTuple = "";
+                                    for (String ele : tuple.toString().split("->")) {
+
+                                        if (atomsNameMap.containsKey(ele)) {
+                                            newTuple += atomsNameMap.get(ele);
+                                        } else {
+                                            newTuple += ele;
+                                        }
+
+                                        newTuple += "->";
+                                    }
+                                    newTuple = newTuple.substring(0, newTuple.length() - 2);
+                                    newFieldBuilder.append(newTuple).append(",");
+                                }
+
+                                newFieldBuilder.deleteCharAt(newFieldBuilder.length() - 1);
+                            }
+                            newFieldBuilder.append("}");
+
+                            sb.append(newSigLabel).append(".").append(field.label).append("=").append(newFieldBuilder)
                                     .append("\n");
+
+//                            sb.append(sig).append(".").append(field.label).append("=").append(ans.eval(field))
+//                                    .append("\n");
                         }
                     }
-                    counterexample_msg = "Counterexample found which means that " + command + " assertion is invalid\n"
-                            + sb;
+//                    System.out.println(sb);
+                    counterexample_msg = "Executing command ["+ newCommand + "] of the Alloy model " + fileName.toString() +", Alloy Analyzer found an counterexample, indicating 'assert " + command.label + "' is violated by this counterexample:\n" + sb;
+//                    counterexample_msg = "Counterexample found which means that " + command + " assertion is invalid\n" + sb;
                 } else {
                     counterexample = "no";
-                    counterexample_msg = "Counterexample not found which means that " + command + " is valid";
+                    counterexample_msg = "Executing command ["+ newCommand + "] of the Alloy model " + fileName.toString() +", Alloy Analyzer found no counterexample, indicating that assert '"
+                            + command.label + "' is valid";
+//                    counterexample_msg = "Counterexample not found which means that " + command + " is valid";
                 }
                 addCounterexample(cntr_cmd, counterexample, counterexample_msg);
             } else if (command.toString().contains("Run")) {
@@ -201,10 +365,13 @@ public class App {
 
                 if (ans.satisfiable()) {
                     instance = "Yes";
-                    instance_msg = "Instance found which means that the specification is consistent";
+                    instance_msg = "Executing command ["+ newCommand + "] of the Alloy model " + fileName.toString() +", Alloy Analyzer generates a valid instance, indicating that the model is consistent and 'pred "
+                            +command.label + "' is satisfied";
+//                    instance_msg = "Instance found which means that the specification is consistent";
                 } else {
                     instance = "No";
-                    instance_msg = "Instance not found which means that the specification is not consistent.";
+                    instance_msg = "Executing command ["+ newCommand + "] of the Alloy model " + fileName.toString() +", Alloy Analyzer does not generate a valid instance, indicating that the model is inconsistent and 'pred "
+                            +command.label + "' or other constraints in the 'fact' is violated";
                 }
                 addInstance(instance_cmd, instance, instance_msg);
             }
