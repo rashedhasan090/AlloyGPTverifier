@@ -1,7 +1,4 @@
-import os
-import json
 from typing import List
-import argparse
 
 
 def remove_dollar_sign(text):
@@ -26,7 +23,7 @@ def remove_specification_part(line):
     end_index = line.find("specification:")
 
     if start_index != -1 and end_index != -1:
-        return line[:start_index] + line[end_index + len("specification:"):]
+        return line[:start_index] + line[end_index + len("specification:") :]
     else:
         return line
 
@@ -51,10 +48,7 @@ def remove_compilation_error_line(compilation_error_message):
     return "\n".join(new_lines)
 
 
-def process_json(filename: str) -> List[str]:
-    with open(filename, "r") as file:
-        json_data = json.load(file)
-
+def process_Alloy_json_report(json_data) -> List[str]:
     output_lines = []
 
     # Process counterexamples
@@ -62,43 +56,36 @@ def process_json(filename: str) -> List[str]:
     if counterexamples:
         for item in counterexamples:
             cntr_cmd = item.get("cntr_cmd", "")
-            cntr_cmd = cntr_cmd.replace("expect 0", "")
+            cntr_cmd = cntr_cmd.replace("expect 0", "").strip()
 
             counterexample_msg = item.get("counterexample_msg", "")
+            counterexample = item.get("counterexample", "")
 
             # Extract assertion name by excluding the word "Check" if present
             assertion_name = remove_dollar_sign(cntr_cmd.replace("Check", "").strip())
 
-            # Exclude "_alloyAnalyzerReport" from command and filename
-            cntr_cmd = remove_dollar_sign(
-                cntr_cmd.replace("_alloyAnalyzerReport", "").strip()
-            )
-
             # Check for "Counterexample not found" and print the appropriate message
-            if "Counterexample not found" in counterexample_msg:
+            if counterexample.lower() == "no":
                 output_lines.append(
-                    f"""Executing command [{cntr_cmd}] of the proposed Alloy model,
-                    Alloy analyzer found no counterexample, """
+                    f"""
+                    Executing command [{cntr_cmd}] of the proposed Alloy model,
+                    Alloy analyzer found no counterexample, indicating assert
+                    {assertion_name} is valid
+                    """
                 )
-                output_lines.append(f"indicating assert {assertion_name} is valid.\n")
             else:
                 # Add the execution command and counterexample message to output_lines
                 output_lines.append(
-                    f"""Executing command [{cntr_cmd}] of the proposed Alloy model,
-                    Alloy analyzer found a counterexample, """
-                )
-                output_lines.append(
-                    f"""Indicating assert {assertion_name} is violated by this
-                      counterexample:\n"""
+                    f"""
+                    Executing command [{cntr_cmd}] of the proposed Alloy model,
+                    Alloy analyzer found a counterexample, Indicating assert
+                    {assertion_name} is violated by this counterexample:\n
+                    """
                 )
 
                 # Exclude unwanted lines and prefixes
                 counterexample_msg_lines = [
-                    remove_dollar_sign(
-                        line.replace(
-                            "Counterexample found which means that", ""
-                        ).replace("this/", "")
-                    )
+                    remove_dollar_sign(line.replace("this/", ""))
                     for line in counterexample_msg.split("\n")
                     if line and "Counterexample found which means that" not in line
                 ]
@@ -107,21 +94,29 @@ def process_json(filename: str) -> List[str]:
     # Process instances
     instances = json_data.get("instances", [])
     if instances:
-        output_lines.append("")
         for item in instances:
             instance_cmd = item.get("instance_cmd", "")
+            inst = item.get("instances", "")
 
             # Extract instance name by excluding the word "Run" if present
             instance_name = remove_dollar_sign(instance_cmd.replace("Run", "").strip())
 
-            # Add the execution command and instance message to output_lines
-            output_lines.append(
-                f"""Executing command [{instance_cmd}] of proposed Alloy model, Alloy
-                  analyzer generates a valid instance,"""
-            )
-            output_lines.append(
-                f"indicating the model is consistent and pred {instance_name} is satisfied.\n"
-            )
+            if inst.lower() == "yes":
+                output_lines.append(
+                    f"""
+                    Executing command [{instance_cmd}] of proposed Alloy model, Alloy
+                    analyzer generates a valid instance, indicating the model is
+                    consistent and pred {instance_name} is satisfied.\n
+                    """
+                )
+            else:
+                output_lines.append(
+                    f"""
+                    Executing command [{instance_cmd}] of proposed Alloy model, Alloy
+                    analyzer does not generate a valid instance, indicating the model is
+                    inconsistent and pred {instance_name} is not satisfied.\n
+                    """
+                )
 
     # Process error
     error = json_data.get("error", "")
@@ -183,24 +178,4 @@ def process_json(filename: str) -> List[str]:
                   {syntax_error_message}"""
             )
 
-    # Save the output to a text file
-    filename = remove_dollar_sign(filename.replace("_alloyAnalyzerReport", "").strip())
-    output_filename = os.path.join(os.getcwd(), f"{filename}_msgToLLM.txt")
-    with open(output_filename, "a") as output_file:
-        # output_file.write("\n".join(output_lines) + "\n")
-        output_file.write("".join(output_lines))
-
     return output_lines
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Process an Alloy JSON report.")
-    parser.add_argument("json_report", type=str, help="The JSON report file")
-    args = parser.parse_args()
-
-    # Call the process_json function
-    process_json(args.json_report)
-
-
-if __name__ == "__main__":
-    main()
