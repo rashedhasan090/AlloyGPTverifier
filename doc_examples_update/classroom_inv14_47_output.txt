@@ -123,3 +123,253 @@ Right type = {this/Teacher} generates a compilation error at Line 96 column 14
 & is irrelevant because the two subexpressions are always disjoint.
 Left type = {this/Student}
 Right type = {this/Teacher}
+
+Executing command [Check inv1_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv1_Repaired is valid.
+
+
+
+Executing command [Check inv2_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv2_Repaired is valid.
+
+
+
+Executing command [Check inv3_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv3_Repaired is valid.
+
+
+
+Executing command [Check inv4_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv4_Repaired is valid.
+
+
+
+Executing command [Check inv5_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv5_Repaired is valid.
+
+
+
+Executing command [Check inv6_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv6_Repaired is valid.
+
+
+
+Executing command [Check inv7_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv7_Repaired is valid.
+
+
+
+Executing command [Check inv8_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv8_Repaired is valid.
+
+
+
+Executing command [Check inv9_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv9_Repaired is valid.
+
+
+
+Executing command [Check inv10_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv10_Repaired is valid.
+
+
+
+Executing command [Check inv11_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv11_Repaired is valid.
+
+
+
+Executing command [Check inv12_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv12_Repaired is valid.
+
+
+
+Executing command [Check inv13_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv13_Repaired is valid.
+
+
+
+Executing command [Check inv14_Repaired] of the Alloy model classroom_inv14_47.als, Alloy analyzer found a counterexample,
+Indicating assert inv14_Repaired is violated by this counterexample:
+
+
+
+Teacher={Teacher0}
+Student={Student0, Student1}
+Person={Student0, Student1, Teacher0}
+Person.Tutors={Student0->Student0, Student0->Student1, Student1->Student1, Student1->Teacher0, Teacher0->Student0}
+Person.Teaches={Student0->Class1, Student0->Class2, Student1->Class0, Student1->Class1, Student1->Class2}
+Group={Group0, Group1, Group2}
+Class={Class0, Class1, Class2}
+Class.Groups={Class0->Student0->Group2, Class0->Student1->Group0, Class0->Student1->Group1, Class0->Teacher0->Group2, Class1->Student0->Group2, Class1->Student1->Group0, Class1->Student1->Group1, Class1->Teacher0->Group2, Class2->Student0->Group2, Class2->Student1->Group0, Class2->Student1->Group1, Class2->Teacher0->Group2}
+Executing command [Check inv15_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv15_Repaired is valid.
+
+
+
+Executing command [Check repair_assert_1] of the Alloy model classroom_inv14_47.als, Alloy analyzer found a counterexample,
+Indicating assert repair_assert_1 is violated by this counterexample:
+
+
+
+Teacher={Teacher0}
+Student={Student0, Student1}
+Person={Student0, Student1, Teacher0}
+Person.Tutors={Student0->Student0, Student0->Student1, Student1->Student1, Student1->Teacher0, Teacher0->Student0}
+Person.Teaches={Student0->Class1, Student0->Class2, Student1->Class0, Student1->Class1, Student1->Class2}
+Group={Group0, Group1, Group2}
+Class={Class0, Class1, Class2}
+Class.Groups={Class0->Student0->Group2, Class0->Student1->Group0, Class0->Student1->Group1, Class0->Teacher0->Group2, Class1->Student0->Group2, Class1->Student1->Group0, Class1->Student1->Group1, Class1->Teacher0->Group2, Class2->Student0->Group2, Class2->Student1->Group0, Class2->Student1->Group1, Class2->Teacher0->Group2}
+
+Executing command [Run repair_pred_1] of Alloy model classroom_inv14_47.als, Alloy analyzer generates a valid instance,
+indicating the model is consistent and pred repair_pred_1 is satisfied.
+
+
+
+
+Compiling the Alloy model classroom_inv14_47.als generates a compilation error at Line 29, Column 13: 
+& is irrelevant because the two subexpressions are always disjoint.
+Left type = {this/Student}
+Right type = {this/Teacher} generates a compilation error at Line 96 column 14
+& is irrelevant because the two subexpressions are always disjoint.
+Left type = {this/Student}
+Right type = {this/Teacher}
+
+Executing command [Check inv1_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv1_Repaired is valid.
+
+
+
+Executing command [Check inv2_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv2_Repaired is valid.
+
+
+
+Executing command [Check inv3_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv3_Repaired is valid.
+
+
+
+Executing command [Check inv4_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv4_Repaired is valid.
+
+
+
+Executing command [Check inv5_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv5_Repaired is valid.
+
+
+
+Executing command [Check inv6_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv6_Repaired is valid.
+
+
+
+Executing command [Check inv7_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv7_Repaired is valid.
+
+
+
+Executing command [Check inv8_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv8_Repaired is valid.
+
+
+
+Executing command [Check inv9_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv9_Repaired is valid.
+
+
+
+Executing command [Check inv10_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv10_Repaired is valid.
+
+
+
+Executing command [Check inv11_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv11_Repaired is valid.
+
+
+
+Executing command [Check inv12_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv12_Repaired is valid.
+
+
+
+Executing command [Check inv13_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv13_Repaired is valid.
+
+
+
+Executing command [Check inv14_Repaired] of the Alloy model classroom_inv14_47.als, Alloy analyzer found a counterexample,
+Indicating assert inv14_Repaired is violated by this counterexample:
+
+
+
+Teacher={Teacher0}
+Student={Student0, Student1}
+Person={Student0, Student1, Teacher0}
+Person.Tutors={Student0->Student0, Student0->Student1, Student1->Student1, Student1->Teacher0, Teacher0->Student0}
+Person.Teaches={Student0->Class1, Student0->Class2, Student1->Class0, Student1->Class1, Student1->Class2}
+Group={Group0, Group1, Group2}
+Class={Class0, Class1, Class2}
+Class.Groups={Class0->Student0->Group2, Class0->Student1->Group0, Class0->Student1->Group1, Class0->Teacher0->Group2, Class1->Student0->Group2, Class1->Student1->Group0, Class1->Student1->Group1, Class1->Teacher0->Group2, Class2->Student0->Group2, Class2->Student1->Group0, Class2->Student1->Group1, Class2->Teacher0->Group2}
+Executing command [Check inv15_Repaired] of Alloy model classroom_inv14_47.als, Alloy analyzer found no counterexample,
+
+indicating assert inv15_Repaired is valid.
+
+
+
+Executing command [Check repair_assert_1] of the Alloy model classroom_inv14_47.als, Alloy analyzer found a counterexample,
+Indicating assert repair_assert_1 is violated by this counterexample:
+
+
+
+Teacher={Teacher0}
+Student={Student0, Student1}
+Person={Student0, Student1, Teacher0}
+Person.Tutors={Student0->Student0, Student0->Student1, Student1->Student1, Student1->Teacher0, Teacher0->Student0}
+Person.Teaches={Student0->Class1, Student0->Class2, Student1->Class0, Student1->Class1, Student1->Class2}
+Group={Group0, Group1, Group2}
+Class={Class0, Class1, Class2}
+Class.Groups={Class0->Student0->Group2, Class0->Student1->Group0, Class0->Student1->Group1, Class0->Teacher0->Group2, Class1->Student0->Group2, Class1->Student1->Group0, Class1->Student1->Group1, Class1->Teacher0->Group2, Class2->Student0->Group2, Class2->Student1->Group0, Class2->Student1->Group1, Class2->Teacher0->Group2}
+
+Executing command [Run repair_pred_1] of Alloy model classroom_inv14_47.als, Alloy analyzer generates a valid instance,
+indicating the model is consistent and pred repair_pred_1 is satisfied.
+
+
+
+
+Compiling the Alloy model classroom_inv14_47.als generates a compilation error at Line 29, Column 13: 
+& is irrelevant because the two subexpressions are always disjoint.
+Left type = {this/Student}
+Right type = {this/Teacher} generates a compilation error at Line 96 column 14
+& is irrelevant because the two subexpressions are always disjoint.
+Left type = {this/Student}
+Right type = {this/Teacher}

@@ -112,3 +112,117 @@ indicating the model is consistent and pred repair_pred_1 is satisfied.
 
 
 
+
+Executing command [Check inv1_Repaired] of the Alloy model production_inv1_2.als, Alloy analyzer found a counterexample,
+Indicating assert inv1_Repaired is violated by this counterexample:
+
+
+
+Position={Position0, Position1, Position2}
+Component={Component0, Component1}
+Component.parts={Component0->Component1, Component1->Resource0, Component1->Component1}
+Component.cposition={Component0->Position1, Component1->Position2}
+Resource={Resource0}
+Product={Resource0, Component0, Component1}
+Robot={Robot0, Robot1}
+Robot.rposition={Robot0->Position1, Robot1->Position0}
+ordering/Ord={ordering/Ord0}
+ordering/Ord.First={ordering/Ord0->Position0}
+ordering/Ord.Next={ordering/Ord0->Position0->Position1, ordering/Ord0->Position1->Position2}
+Executing command [Check inv2_Repaired] of Alloy model production_inv1_2.als, Alloy analyzer found no counterexample,
+
+indicating assert inv2_Repaired is valid.
+
+
+
+Executing command [Check inv3_Repaired] of Alloy model production_inv1_2.als, Alloy analyzer found no counterexample,
+
+indicating assert inv3_Repaired is valid.
+
+
+
+Executing command [Check inv4_Repaired] of Alloy model production_inv1_2.als, Alloy analyzer found no counterexample,
+
+indicating assert inv4_Repaired is valid.
+
+
+
+Executing command [Check repair_assert_1] of the Alloy model production_inv1_2.als, Alloy analyzer found a counterexample,
+Indicating assert repair_assert_1 is violated by this counterexample:
+
+
+
+Position={Position0, Position1, Position2}
+Component={Component0, Component1}
+Component.parts={Component0->Component1, Component1->Resource0, Component1->Component1}
+Component.cposition={Component0->Position1, Component1->Position2}
+Resource={Resource0}
+Product={Resource0, Component0, Component1}
+Robot={Robot0, Robot1}
+Robot.rposition={Robot0->Position1, Robot1->Position0}
+ordering/Ord={ordering/Ord0}
+ordering/Ord.First={ordering/Ord0->Position0}
+ordering/Ord.Next={ordering/Ord0->Position0->Position1, ordering/Ord0->Position1->Position2}
+
+Executing command [Run repair_pred_1] of Alloy model production_inv1_2.als, Alloy analyzer generates a valid instance,
+indicating the model is consistent and pred repair_pred_1 is satisfied.
+
+
+
+
+Executing command [Check inv1_Repaired] of the Alloy model production_inv1_2.als, Alloy analyzer found a counterexample,
+Indicating assert inv1_Repaired is violated by this counterexample:
+
+
+
+Position={Position0, Position1, Position2}
+Component={Component0, Component1}
+Component.parts={Component0->Component1, Component1->Resource0, Component1->Component1}
+Component.cposition={Component0->Position1, Component1->Position2}
+Resource={Resource0}
+Product={Resource0, Component0, Component1}
+Robot={Robot0, Robot1}
+Robot.rposition={Robot0->Position1, Robot1->Position0}
+ordering/Ord={ordering/Ord0}
+ordering/Ord.First={ordering/Ord0->Position0}
+ordering/Ord.Next={ordering/Ord0->Position0->Position1, ordering/Ord0->Position1->Position2}
+Executing command [Check inv2_Repaired] of Alloy model production_inv1_2.als, Alloy analyzer found no counterexample,
+
+indicating assert inv2_Repaired is valid.
+
+
+
+Executing command [Check inv3_Repaired] of Alloy model production_inv1_2.als, Alloy analyzer found no counterexample,
+
+indicating assert inv3_Repaired is valid.
+
+
+
+Executing command [Check inv4_Repaired] of Alloy model production_inv1_2.als, Alloy analyzer found no counterexample,
+
+indicating assert inv4_Repaired is valid.
+
+
+
+Executing command [Check repair_assert_1] of the Alloy model production_inv1_2.als, Alloy analyzer found a counterexample,
+Indicating assert repair_assert_1 is violated by this counterexample:
+
+
+
+Position={Position0, Position1, Position2}
+Component={Component0, Component1}
+Component.parts={Component0->Component1, Component1->Resource0, Component1->Component1}
+Component.cposition={Component0->Position1, Component1->Position2}
+Resource={Resource0}
+Product={Resource0, Component0, Component1}
+Robot={Robot0, Robot1}
+Robot.rposition={Robot0->Position1, Robot1->Position0}
+ordering/Ord={ordering/Ord0}
+ordering/Ord.First={ordering/Ord0->Position0}
+ordering/Ord.Next={ordering/Ord0->Position0->Position1, ordering/Ord0->Position1->Position2}
+
+Executing command [Run repair_pred_1] of Alloy model production_inv1_2.als, Alloy analyzer generates a valid instance,
+indicating the model is consistent and pred repair_pred_1 is satisfied.
+
+
+

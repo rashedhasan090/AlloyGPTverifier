@@ -6,3 +6,11 @@ enum fun let open pred
 Compiling the Alloy model lts_inv1_15.als generates a syntax error at line line 103 column 1:
 There are 5 possible tokens that can appear here:
 enum fun let open pred 
+
+Compiling the Alloy model lts_inv1_15.als generates a syntax error at line line 103 column 1:
+There are 5 possible tokens that can appear here:
+enum fun let open pred 
+
+Compiling the Alloy model lts_inv1_15.als generates a syntax error at line line 103 column 1:
+There are 5 possible tokens that can appear here:
+enum fun let open pred 

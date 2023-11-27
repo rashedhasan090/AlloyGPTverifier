@@ -18,3 +18,43 @@ indicating the model is consistent and pred repair_pred_1 is satisfied.
 
 
 
+
+Executing command [Check repair_assert_1] of the Alloy model student18_1.als, Alloy analyzer found a counterexample,
+Indicating assert repair_assert_1 is violated by this counterexample:
+
+
+
+List={List0}
+List.header={List0->Node2}
+Node={Node0, Node1, Node2}
+Node.link={Node0->Node1, Node1->Node0, Node2->Node1}
+Node.elem={Node0->6, Node1->6, Node2->5}
+True={True0}
+False={False0}
+Boolean={True0, False0}
+
+Executing command [Run repair_pred_1] of Alloy model student18_1.als, Alloy analyzer generates a valid instance,
+indicating the model is consistent and pred repair_pred_1 is satisfied.
+
+
+
+
+Executing command [Check repair_assert_1] of the Alloy model student18_1.als, Alloy analyzer found a counterexample,
+Indicating assert repair_assert_1 is violated by this counterexample:
+
+
+
+List={List0}
+List.header={List0->Node2}
+Node={Node0, Node1, Node2}
+Node.link={Node0->Node1, Node1->Node0, Node2->Node1}
+Node.elem={Node0->6, Node1->6, Node2->5}
+True={True0}
+False={False0}
+Boolean={True0, False0}
+
+Executing command [Run repair_pred_1] of Alloy model student18_1.als, Alloy analyzer generates a valid instance,
+indicating the model is consistent and pred repair_pred_1 is satisfied.
+
+
+
