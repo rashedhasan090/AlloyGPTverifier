@@ -1,0 +1,8 @@
+Command Check repair_assert_1 for exactly 1 Address, exactly 2 Name, exactly 1 Book: (00:32:59)
+Counterexample found
+
+=========================================
+Command Run repair_pred_1 for exactly 1 Address, exactly 2 Name, exactly 1 Book: (00:32:59)
+Instance found
+
+=========================================

@@ -1,0 +1,8 @@
+Command Run solvePuzzle for 8 State expect 1: (18:29:13)
+Instance found
+
+=========================================
+Command Check NoQuantumObjects for 8 State expect 0: (18:29:13)
+No Counterexample found
+
+=========================================
